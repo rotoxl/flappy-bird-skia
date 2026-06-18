@@ -22,7 +22,7 @@ type Props = {
     height: number;
   };
   birdPosition: SharedValue<number>;
-  gameStatus: SharedValue<GameStatus>;
+  gameStatus: GameStatus;
 };
 
 const FRAME = { width: 34, height: 24, sep: 10, scale: 1.3 };
