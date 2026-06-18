@@ -1,4 +1,4 @@
-import { GAME_BOUNDS } from '@/features/game/consts';
+import { GAME_BOUNDS, GAME_STATUS, GameStatus } from '@/features/game/consts';
 import type { SkImage } from '@shopify/react-native-skia';
 import { Group, Image, useImage } from '@shopify/react-native-skia';
 
@@ -8,9 +8,10 @@ type Props = {
     width: number;
     height: number;
   };
+  gameStatus: GameStatus;
 };
 
-export const GameScore = ({ score, screenSize }: Props) => {
+export const GameScore = ({ score, screenSize, gameStatus }: Props) => {
   const num0 = useImage(require('@/assets/game/0.png'));
   const num1 = useImage(require('@/assets/game/1.png'));
   const num2 = useImage(require('@/assets/game/2.png'));
@@ -31,6 +32,10 @@ export const GameScore = ({ score, screenSize }: Props) => {
 
   const digitWidth = 24;
   const digitHeight = 36;
+
+  if (gameStatus === GAME_STATUS.READY) {
+    return null;
+  }
 
   return (
     <Group

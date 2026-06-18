@@ -15,6 +15,7 @@ import {
   GAME_STATUS,
   GRAVITY,
   GameStatus,
+  PIPE_GAP,
   PIPE_SIZE,
   PIPE_SPEED_MS,
 } from '@/features/game/consts';
@@ -29,12 +30,28 @@ export const useGame = () => {
 
   const birdPosition = useSharedValue(screenSize.height / 2);
   const birdSpeed = useSharedValue(0);
-  const gameStatus = useSharedValue<GameStatus>(GAME_STATUS.PLAYING);
+  const gameStatus = useSharedValue<GameStatus>(GAME_STATUS.READY);
+
+  const [pipePosition, setPipePosition] = useState(screenSize.height / 2);
+
+  const [gameStatusStateValue, setGameStatusStateValue] = useState<GameStatus>(
+    gameStatus.value,
+  );
+
+  const forceRerender = () => {
+    setGameStatusStateValue(gameStatus.value);
+  };
+
+  useAnimatedReaction(
+    () => gameStatus.value,
+    () => scheduleOnRN(forceRerender),
+  );
 
   const [gameScore, setGameScore] = useState(0);
 
   const startScreenMotion = () => {
     'worklet';
+
     screenMotion.value = withSequence(
       withTiming(screenSize.width, { duration: 0 }),
       withTiming(-PIPE_SIZE.width, {
@@ -56,6 +73,14 @@ export const useGame = () => {
     birdSpeed.value = birdSpeed.value + (GRAVITY * dt) / 1000;
   });
 
+  const randomizePipePosition = () => {
+    const borderBottom = screenSize.height - GAME_BOUNDS.bottom - 2 * PIPE_GAP;
+    const borderTop = GAME_BOUNDS.bottom + PIPE_GAP;
+
+    const randomY = borderTop + Math.random() * (borderBottom - borderTop);
+    setPipePosition(randomY);
+  };
+
   useAnimatedReaction(
     () => screenMotion.value,
     (currentValue, previousValue) => {
@@ -66,6 +91,7 @@ export const useGame = () => {
         previousValue > -PIPE_SIZE.width
       ) {
         startScreenMotion();
+        scheduleOnRN(randomizePipePosition);
       }
 
       const birdPositionX = screenSize.width / 4;
@@ -99,9 +125,23 @@ export const useGame = () => {
     },
   );
 
+  const resetGame = () => {
+    setGameScore(0);
+    gameStatus.value = GAME_STATUS.PLAYING;
+    birdPosition.value = screenSize.height / 2;
+    birdSpeed.value = 0;
+    startScreenMotion();
+  };
+
   const onTouchStart = () => {
     'worklet';
-    birdSpeed.value = -FLAP_FORCE;
+    if (gameStatus.value === GAME_STATUS.PLAYING) {
+      birdSpeed.value = -FLAP_FORCE;
+    } else if (gameStatus.value === GAME_STATUS.READY) {
+      scheduleOnRN(resetGame);
+    } else if (gameStatus.value === GAME_STATUS.GAME_OVER) {
+      scheduleOnRN(resetGame);
+    }
   };
 
   return {
@@ -112,8 +152,9 @@ export const useGame = () => {
 
     birdPosition,
     birdSpeed,
+    pipePosition,
 
-    gameStatus,
+    gameStatusStateValue,
     gameScore,
     onTouchStart,
   };

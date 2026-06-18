@@ -7,16 +7,14 @@ import {
   useRSXformBuffer,
   useRectBuffer,
 } from '@shopify/react-native-skia';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   SharedValue,
-  useAnimatedReaction,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 type Props = {
   screenSize: {
@@ -42,10 +40,6 @@ export default function Bird({ screenSize, birdPosition, gameStatus }: Props) {
   const frameIndex = useSharedValue(0);
 
   const birdX = screenSize.width / 4 - scaledSize.width / 2;
-
-  const [gameStatusValue, setGameStatusValue] = useState<GameStatus>(
-    gameStatus.value,
-  );
 
   useEffect(() => {
     frameIndex.value = withRepeat(
@@ -75,20 +69,15 @@ export default function Bird({ screenSize, birdPosition, gameStatus }: Props) {
     val.set(FRAME.scale, 0, birdX, birdPosition.value);
   });
 
-  const forceRerender = () => {
-    setGameStatusValue(gameStatus.value);
-  };
-
-  useAnimatedReaction(
-    () => gameStatus.value,
-    () => scheduleOnRN(forceRerender),
-  );
-
   if (!spriteSheet) {
     return null;
   }
 
-  if (gameStatusValue === GAME_STATUS.PLAYING) {
+  if (gameStatus === GAME_STATUS.READY) {
+    return null;
+  }
+
+  if (gameStatus === GAME_STATUS.PLAYING) {
     return (
       <Group>
         <Atlas image={spriteSheet} sprites={sprites} transforms={transforms} />
