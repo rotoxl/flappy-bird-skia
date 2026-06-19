@@ -34,16 +34,17 @@ export default function Game() {
           screenSize={screenSize}
           gameStatus={gameStatusStateValue}
         />
-        <GameCredits
-          gameStatus={gameStatusStateValue}
-          screenSize={screenSize}
-        />
 
         <Bird
           screenSize={screenSize}
           birdPosition={birdPosition}
           birdSpeed={birdSpeed}
           gameStatus={gameStatusStateValue}
+        />
+
+        <GameCredits
+          gameStatus={gameStatusStateValue}
+          screenSize={screenSize}
         />
       </Canvas>
     </GestureDetector>
