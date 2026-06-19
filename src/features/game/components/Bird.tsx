@@ -72,6 +72,34 @@ export default function Bird({
     );
   });
 
+  const getRSXParams = ({
+    angle,
+    scale,
+    birdX,
+    birdY,
+  }: {
+    angle: number;
+    scale: number;
+    birdX: number;
+    birdY: number;
+  }) => {
+    'worklet';
+
+    const scos = scale * Math.cos(angle);
+    const ssin = scale * Math.sin(angle);
+    const centerX = FRAME.width / 2;
+    const centerY = FRAME.height / 2;
+    const x = birdX + scaledSize.width / 2;
+    const y = birdY + scaledSize.height / 2;
+
+    return {
+      scos,
+      ssin,
+      x: x - scos * centerX + ssin * centerY,
+      y: y - ssin * centerX - scos * centerY,
+    };
+  };
+
   const transforms = useRSXformBuffer(SPRITE_COUNT, (val) => {
     'worklet';
 
@@ -79,19 +107,15 @@ export default function Bird({
       -MAX_TILT_ANGLE,
       Math.min(MAX_TILT_ANGLE, birdSpeed.value / SPEED_FOR_MAX_TILT),
     );
-    const scos = FRAME.scale * Math.cos(angle);
-    const ssin = FRAME.scale * Math.sin(angle);
-    const centerX = FRAME.width / 2;
-    const centerY = FRAME.height / 2;
-    const x = birdX + scaledSize.width / 2;
-    const y = birdPosition.value + scaledSize.height / 2;
 
-    val.set(
-      scos,
-      ssin,
-      x - scos * centerX + ssin * centerY,
-      y - ssin * centerX - scos * centerY,
-    );
+    const { scos, ssin, x, y } = getRSXParams({
+      angle,
+      scale: FRAME.scale,
+      birdX,
+      birdY: birdPosition.value,
+    });
+
+    val.set(scos, ssin, x, y);
   });
 
   if (!spriteSheet) {
