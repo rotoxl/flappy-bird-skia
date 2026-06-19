@@ -14,7 +14,7 @@ export default function Game() {
     screenSize,
     screenMotion,
     birdPosition,
-
+    birdSpeed,
     gameStatusStateValue,
     gameScore,
     pipePosition,
@@ -42,6 +42,7 @@ export default function Game() {
         <Bird
           screenSize={screenSize}
           birdPosition={birdPosition}
+          birdSpeed={birdSpeed}
           gameStatus={gameStatusStateValue}
         />
       </Canvas>

@@ -7,7 +7,7 @@ export const PIPE_SIZE = {
   height: BASE_PIPE_SIZE.height * BASE_PIPE_SIZE.scale,
 };
 
-export const PIPE_GAP = 100;
+export const PIPE_GAP = 90; //will be multiplied by 2
 
 export const PIPE_SPEED_MS = 2000;
 

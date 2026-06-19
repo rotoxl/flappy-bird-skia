@@ -81,6 +81,19 @@ export const useGame = () => {
     setPipePosition(randomY);
   };
 
+  const isCollision = (
+    bird: { x: number; y: number },
+    pipe: { x: number; y: number; height: number },
+  ) => {
+    'worklet';
+    return (
+      bird.x > pipe.x &&
+      bird.x < pipe.x + PIPE_SIZE.width &&
+      bird.y > pipe.y &&
+      bird.y < pipe.y + pipe.height
+    );
+  };
+
   useAnimatedReaction(
     () => screenMotion.value,
     (currentValue, previousValue) => {
@@ -94,9 +107,27 @@ export const useGame = () => {
         scheduleOnRN(randomizePipePosition);
       }
 
-      const birdPositionX = screenSize.width / 4;
-      if (currentValue <= birdPositionX && previousValue > birdPositionX) {
+      const bird = { x: screenSize.width / 4, y: birdPosition.value };
+
+      if (currentValue <= bird.x && previousValue > bird.x) {
         scheduleOnRN(increaseScore);
+      }
+
+      const pipeTop = {
+        x: currentValue,
+        y: -PIPE_SIZE.height - PIPE_GAP + pipePosition,
+        height: PIPE_SIZE.height,
+        width: PIPE_SIZE.width,
+      };
+
+      const pipeBottom = {
+        ...pipeTop,
+        y: PIPE_GAP + pipePosition,
+      };
+
+      if (isCollision(bird, pipeTop) || isCollision(bird, pipeBottom)) {
+        gameStatus.value = GAME_STATUS.GAME_OVER;
+        return;
       }
     },
   );
@@ -130,6 +161,7 @@ export const useGame = () => {
     gameStatus.value = GAME_STATUS.PLAYING;
     birdPosition.value = screenSize.height / 2;
     birdSpeed.value = 0;
+    setPipePosition(screenSize.height / 2);
     startScreenMotion();
   };
 
